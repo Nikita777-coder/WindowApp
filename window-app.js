@@ -51,11 +51,20 @@ function createWindow(windowId) {
     const header = document.createElement('div');
     header.className = 'window-header';
 
+    const windowTitle = document.createElement('div');
+    windowTitle.className = 'window-title';
+
+    const windowControls = document.createElement('div');
+    windowControls.className = 'window-controls';
+
     const title = document.createElement('span');
     title.textContent = `Окно ${+(windowId.replace('window', '')) + 1}`;
-    header.appendChild(title);
+    windowTitle.appendChild(title);
 
-    getBaseWindowButtons(win).forEach(button => header.appendChild(button));
+    getBaseWindowButtons(win).forEach(button => windowControls.appendChild(button));
+
+    header.appendChild(windowTitle);
+    header.appendChild(windowControls);
 
     win.appendChild(header);
 
