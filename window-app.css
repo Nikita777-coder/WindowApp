@@ -78,12 +78,7 @@ body {
 }
 
 .window-controls .close-btn {
-    cursor: pointer;
     background-color: red;
-    border: none;
-    padding: 3px;
-    color: white;
-    margin-left: 5px;
 }
 
 .window-controls .minimize-btn {
