@@ -1,6 +1,13 @@
 let windowCounter = 0;
 let windows = [];
 
+/**
+ * Create new Button in window
+ * @param className
+ * @param textContent - button displayed name or symbols
+ * @param onClick
+ * @constructor
+ */
 function WindowButton(className, textContent, onClick) {
     this.button = document.createElement('button');
     this.button.className = className;
@@ -32,6 +39,10 @@ function getBaseWindowButtons(win) {
     ];
 }
 
+/**
+ * Create specified button without adding it to windows variable and without counting
+ * @param windowId
+ */
 function createWindow(windowId) {
     const win = document.createElement('div');
     win.className = 'window';
@@ -69,6 +80,10 @@ function closeWindow(windowId) {
     }
 }
 
+/**
+ * Delete window from page
+ * @param windowId
+ */
 function minimizeWindow(windowId) {
     const win = document.getElementById(windowId);
     if (win) {
@@ -79,6 +94,10 @@ function minimizeWindow(windowId) {
     }
 }
 
+/**
+ * Add window to menu
+ * @param windowId
+ */
 function addToMenu(windowId) {
     const listItem = document.createElement('li');
     listItem.id = `menu-${windowId}`;
@@ -87,6 +106,10 @@ function addToMenu(windowId) {
     document.getElementById('windowList').appendChild(listItem);
 }
 
+/**
+ * Delete button from menu and add it to page
+ * @param windowId
+ */
 function restoreWindow(windowId) {
     const win = document.getElementById(windowId);
     if (win) {
@@ -170,6 +193,9 @@ window.addEventListener('beforeunload', () => {
     localStorage.setItem('windowCounter', JSON.stringify(windowCounter));
 });
 
+/**
+ * Restore elements from previous state and rollback page to this state
+ */
 window.addEventListener('keydown', (event) => {
     if (event.key === 'r' || event.key === 'R') {
         let savedWindows = JSON.parse(localStorage.getItem('windows'));
