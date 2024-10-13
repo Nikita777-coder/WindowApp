@@ -1,47 +1,74 @@
 let windowCounter = 0;
 let windows = [];
-document.getElementById('addWindowBtn').addEventListener('click', () => {
-    createWindow();
-});
 
-function createWindow() {
+/**
+ * Create new Button in window
+ * @param className
+ * @param textContent - button displayed name or symbols
+ * @param onClick
+ * @constructor
+ */
+function WindowButton(className, textContent, onClick) {
+    this.button = document.createElement('button');
+    this.button.className = className;
+    this.button.textContent = textContent;
+    this.button.onclick = onClick;
+
+    Object.defineProperty(this, 'button', {
+        configurable: false
+    });
+}
+
+function getBaseWindowButtons(win) {
+    return [
+        new WindowButton(
+            'fullscreen-btn',
+            '[ ]',
+            () => toggleFullscreen(win)
+        ).button,
+        new WindowButton(
+            'minimize-btn',
+            '-',
+            () => minimizeWindow(win.id)
+        ).button,
+        new WindowButton(
+            'close-btn',
+            'X',
+            () => closeWindow(win.id)
+        ).button
+    ];
+}
+
+/**
+ * Create specified button without adding it to windows variable and without counting
+ * @param windowId
+ */
+function createWindow(windowId) {
     const win = document.createElement('div');
     win.className = 'window';
-    win.id = `window${windowCounter}`;
+    win.id = windowId;
 
     const header = document.createElement('div');
     header.className = 'window-header';
 
     const title = document.createElement('span');
-    title.textContent = `Окно ${windowCounter + 1}`;
-
-    const closeButton = document.createElement('button');
-    closeButton.className = 'close-btn';
-    closeButton.textContent = 'X';
-    closeButton.onclick = () => closeWindow(win.id);
-
-    const minimizeButton = document.createElement('button');
-    minimizeButton.className = 'minimize-btn';
-    minimizeButton.textContent = '-';
-    minimizeButton.onclick = () => minimizeWindow(win.id);
-
-    const fullscreenButton = document.createElement('button');
-    fullscreenButton.className = 'fullscreen-btn';
-    fullscreenButton.textContent = '[ ]';
-    fullscreenButton.onclick = () => toggleFullscreen(win);
-
+    title.textContent = `Окно ${+(windowId.replace('window', '')) + 1}`;
     header.appendChild(title);
-    header.appendChild(minimizeButton);
-    header.appendChild(fullscreenButton);
-    header.appendChild(closeButton);
+
+    getBaseWindowButtons(win).forEach(button => header.appendChild(button));
 
     win.appendChild(header);
 
     document.body.appendChild(win);
 
     makeDraggable(win);
+}
 
-    windows.push({ id: win.id, isMinimized: false, isFullscreen: false });
+function createNewWindow() {
+    const winId = `window${windowCounter}`;
+    createWindow(winId);
+
+    windows.push({ id: winId, isMinimized: false, isFullscreen: false });
     windowCounter++;
 }
 
@@ -53,6 +80,10 @@ function closeWindow(windowId) {
     }
 }
 
+/**
+ * Delete window from page
+ * @param windowId
+ */
 function minimizeWindow(windowId) {
     const win = document.getElementById(windowId);
     if (win) {
@@ -63,14 +94,22 @@ function minimizeWindow(windowId) {
     }
 }
 
+/**
+ * Add window to menu
+ * @param windowId
+ */
 function addToMenu(windowId) {
     const listItem = document.createElement('li');
     listItem.id = `menu-${windowId}`;
-    listItem.textContent = `Окно ${windowId.replace('window', '')}`;
+    listItem.textContent = `Окно ${+(windowId.replace('window', '')) + 1}`;
     listItem.onclick = () => restoreWindow(windowId);
     document.getElementById('windowList').appendChild(listItem);
 }
 
+/**
+ * Delete button from menu and add it to page
+ * @param windowId
+ */
 function restoreWindow(windowId) {
     const win = document.getElementById(windowId);
     if (win) {
@@ -88,21 +127,21 @@ function restoreWindow(windowId) {
     }
 }
 
+function windowStyle(win, width, height, top, left) {
+    win.style.width = width;
+    win.style.height = height;
+    win.style.top = top;
+    win.style.left = left;
+}
+
 function toggleFullscreen(win) {
     const windowInfo = windows.find(w => w.id === win.id && w.isMinimized === false);
-    if (windowInfo.isFullscreen) {
-        win.style.width = '300px';
-        win.style.height = '200px';
-        win.style.top = '100px';
-        win.style.left = '100px';
-        windowInfo.isFullscreen = false;
-    } else {
-        win.style.width = '100vw';
-        win.style.height = '100vh';
-        win.style.top = '0';
-        win.style.left = '0';
-        windowInfo.isFullscreen = true;
-    }
+
+    windowInfo.isFullscreen ?
+        windowStyle(win, '300px','200px', '100px', '100px') :
+        windowStyle(win, '100vw', '100vh', '0', '0');
+
+    windowInfo.isFullscreen = !windowInfo.isFullscreen;
 }
 
 function makeDraggable(win) {
@@ -136,21 +175,41 @@ function makeDraggable(win) {
     }
 }
 
-window.addEventListener('beforeunload', () => {
-    localStorage.clear()
-    localStorage.setItem('windows', JSON.stringify(windows));
+function deepCloseWindow(windowId) {
+    closeWindow(windowId);
+
+    const listItem = document.getElementById(`menu-${windowId}`);
+    if (listItem) {
+        listItem.remove();
+    }
+}
+
+document.getElementById('addWindowBtn').addEventListener('click', () => {
+    createNewWindow();
 });
 
+window.addEventListener('beforeunload', () => {
+    localStorage.setItem('windows', JSON.stringify(windows));
+    localStorage.setItem('windowCounter', JSON.stringify(windowCounter));
+});
+
+/**
+ * Restore elements from previous state and rollback page to this state
+ */
 window.addEventListener('keydown', (event) => {
     if (event.key === 'r' || event.key === 'R') {
-        windows = JSON.parse(localStorage.getItem('windows'));
+        let savedWindows = JSON.parse(localStorage.getItem('windows'));
 
-        if (windows) {
-            let savedOpenWindows = windows.filter(window => window.isMinimized === false);
+        if (savedWindows) {
+            windowCounter = JSON.parse(localStorage.getItem('windowCounter'));
+            windows = savedWindows
             let savedClosedWindows = windows.filter(window => window.isMinimized === true);
 
-            savedOpenWindows.forEach(window => createWindow());
-            savedClosedWindows.forEach(window => addToMenu(window.id))
+            windows.forEach(window => createWindow(window.id));
+            savedClosedWindows.forEach(window => minimizeWindow(window.id))
+        } else {
+            windows.forEach(window => deepCloseWindow(window.id));
+            windowCounter = 0;
         }
     }
 });
