@@ -67,21 +67,24 @@ body {
     align-items: center;
 }
 
-.window-header .close-btn,
-.window-header .minimize-btn,
-.window-header .fullscreen-btn {
-    cursor: pointer;
-    background-color: red;
-    border: none;
-    padding: 3px;
-    color: white;
-    margin-left: 5px;
+.window-title {
+    flex-grow: 1;
+    padding-left: 10px;
 }
 
-.window-header .minimize-btn {
+.window-controls {
+    display: flex;
+    gap: 5px;
+}
+
+.window-controls .close-btn {
+    background-color: red;
+}
+
+.window-controls .minimize-btn {
     background-color: orange;
 }
 
-.window-header .fullscreen-btn {
+.window-controls .fullscreen-btn {
     background-color: green;
 }

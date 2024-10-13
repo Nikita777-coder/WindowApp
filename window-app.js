@@ -51,11 +51,36 @@ function createWindow(windowId) {
     const header = document.createElement('div');
     header.className = 'window-header';
 
+    const windowTitle = document.createElement('div');
+    windowTitle.className = 'window-title';
+
+    const windowControls = document.createElement('div');
+    windowControls.className = 'window-controls';
+
     const title = document.createElement('span');
     title.textContent = `Окно ${+(windowId.replace('window', '')) + 1}`;
-    header.appendChild(title);
+    windowTitle.appendChild(title);
 
-    getBaseWindowButtons(win).forEach(button => header.appendChild(button));
+    let baseWindowButtons = getBaseWindowButtons(win);
+
+    // let maxBackgroundSizeOfButton = baseWindowButtons.reduce(
+    //     (value, a) => {
+    //         let aRect = a.getBoundingClientRect();
+    //
+    //         return Math.max(
+    //             aRect.height, aRect.width, value
+    //         )
+    //     }, 0
+    // );
+    // baseWindowButtons.forEach(button => {
+    //     button.style.height = `${maxBackgroundSizeOfButton}px`;
+    //     button.style.width = `${maxBackgroundSizeOfButton}px`
+    // })
+
+    baseWindowButtons.forEach(button => windowControls.appendChild(button));
+
+    header.appendChild(windowTitle);
+    header.appendChild(windowControls);
 
     win.appendChild(header);
 
