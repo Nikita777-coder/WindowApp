@@ -1,0 +1,87 @@
+body {
+    font-family: Arial, sans-serif;
+    margin: 0;
+    padding: 0;
+    height: 100vh;
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-end;
+}
+
+#menu {
+    position: fixed;
+    bottom: 0;
+    width: 100%;
+    background-color: #f0f0f0;
+    padding: 10px;
+    border-top: 1px solid #ccc;
+    display: flex;
+    justify-content: center;
+}
+
+#menu h2 {
+    margin: 0;
+    margin-right: 20px;
+}
+
+#windowList {
+    list-style-type: none;
+    margin: 0;
+    padding: 0;
+    display: flex;
+    gap: 10px;
+}
+
+#addWindowBtn {
+    position: fixed;
+    top: 10px;
+    right: 10px;
+    padding: 10px;
+    background-color: #007bff;
+    color: white;
+    border: none;
+    cursor: pointer;
+}
+
+.window {
+    width: 300px;
+    height: 200px;
+    background-color: #ffffff;
+    border: 1px solid #ccc;
+    position: absolute;
+    top: 100px;
+    left: 100px;
+    padding: 10px;
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.2);
+    resize: none;
+}
+
+.window-header {
+    cursor: move;
+    background-color: #007bff;
+    color: white;
+    padding: 5px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.window-header .close-btn,
+.window-header .minimize-btn,
+.window-header .fullscreen-btn {
+    cursor: pointer;
+    background-color: red;
+    border: none;
+    padding: 3px;
+    color: white;
+    margin-left: 5px;
+}
+
+.window-header .minimize-btn {
+    background-color: orange;
+}
+
+.window-header .fullscreen-btn {
+    background-color: green;
+}
