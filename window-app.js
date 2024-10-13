@@ -104,21 +104,21 @@ function restoreWindow(windowId) {
     }
 }
 
+function windowStyle(win, width, height, top, left) {
+    win.style.width = width;
+    win.style.height = height;
+    win.style.top = top;
+    win.style.left = left;
+}
+
 function toggleFullscreen(win) {
     const windowInfo = windows.find(w => w.id === win.id && w.isMinimized === false);
-    if (windowInfo.isFullscreen) {
-        win.style.width = '300px';
-        win.style.height = '200px';
-        win.style.top = '100px';
-        win.style.left = '100px';
-        windowInfo.isFullscreen = false;
-    } else {
-        win.style.width = '100vw';
-        win.style.height = '100vh';
-        win.style.top = '0';
-        win.style.left = '0';
-        windowInfo.isFullscreen = true;
-    }
+
+    windowInfo.isFullscreen ?
+        windowStyle(win, '300px','200px', '100px', '100px') :
+        windowStyle(win, '100vw', '100vh', '0', '0');
+
+    windowInfo.isFullscreen = !windowInfo.isFullscreen;
 }
 
 function makeDraggable(win) {
