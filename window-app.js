@@ -1,5 +1,6 @@
 let windowCounter = 0;
 let windows = [];
+
 document.getElementById('addWindowBtn').addEventListener('click', () => {
     createWindow();
 });
@@ -136,21 +137,73 @@ function makeDraggable(win) {
     }
 }
 
+function recreateWindow(windowId) {
+    const win = document.createElement('div');
+    win.className = 'window';
+    win.id = windowId;
+
+    const header = document.createElement('div');
+    header.className = 'window-header';
+
+    const title = document.createElement('span');
+    let number = +(windowId.replace('window', '')) + 1;
+    title.textContent = `Окно ${number}`;
+
+    const closeButton = document.createElement('button');
+    closeButton.className = 'close-btn';
+    closeButton.textContent = 'X';
+    closeButton.onclick = () => closeWindow(win.id);
+
+    const minimizeButton = document.createElement('button');
+    minimizeButton.className = 'minimize-btn';
+    minimizeButton.textContent = '-';
+    minimizeButton.onclick = () => minimizeWindow(win.id);
+
+    const fullscreenButton = document.createElement('button');
+    fullscreenButton.className = 'fullscreen-btn';
+    fullscreenButton.textContent = '[ ]';
+    fullscreenButton.onclick = () => toggleFullscreen(win);
+
+    header.appendChild(title);
+    header.appendChild(minimizeButton);
+    header.appendChild(fullscreenButton);
+    header.appendChild(closeButton);
+
+    win.appendChild(header);
+
+    document.body.appendChild(win);
+
+    makeDraggable(win);
+}
+
+function deepCloseWindow(windowId) {
+    closeWindow(windowId);
+
+    const listItem = document.getElementById(`menu-${windowId}`);
+    if (listItem) {
+        listItem.remove();
+    }
+}
+
 window.addEventListener('beforeunload', () => {
-    localStorage.clear()
     localStorage.setItem('windows', JSON.stringify(windows));
+    localStorage.setItem('windowCounter', JSON.stringify(windowCounter));
 });
 
 window.addEventListener('keydown', (event) => {
     if (event.key === 'r' || event.key === 'R') {
-        windows = JSON.parse(localStorage.getItem('windows'));
+        let savedWindows = JSON.parse(localStorage.getItem('windows'));
 
-        if (windows) {
-            let savedOpenWindows = windows.filter(window => window.isMinimized === false);
+        if (savedWindows) {
+            windowCounter = JSON.parse(localStorage.getItem('windowCounter'));
+            windows = savedWindows
             let savedClosedWindows = windows.filter(window => window.isMinimized === true);
 
-            savedOpenWindows.forEach(window => createWindow());
-            savedClosedWindows.forEach(window => addToMenu(window.id))
+            windows.forEach(window => recreateWindow(window.id));
+            savedClosedWindows.forEach(window => minimizeWindow(window.id))
+        } else {
+            windows.forEach(window => deepCloseWindow(window.id));
+            windowCounter = 0;
         }
     }
 });
