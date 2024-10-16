@@ -190,9 +190,8 @@ function toggleFullscreen(win) {
 
 function makeDraggable(win) {
     let offsetX = 0, offsetY = 0, initialX = 0, initialY = 0;
-    const header = win.querySelector('.window-header');
 
-    header.onmousedown = dragMouseDown;
+    win.onmousedown = dragMouseDown;
 
     function dragMouseDown(e) {
         e.preventDefault();
