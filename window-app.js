@@ -53,29 +53,12 @@ function createWindow(windowId) {
 
     const windowTitle = document.createElement('div');
     windowTitle.className = 'window-title';
+    windowTitle.textContent = `Окно ${+(windowId.replace('window', '')) + 1}`;
 
     const windowControls = document.createElement('div');
     windowControls.className = 'window-controls';
 
-    const title = document.createElement('span');
-    title.textContent = `Окно ${+(windowId.replace('window', '')) + 1}`;
-    windowTitle.appendChild(title);
-
     let baseWindowButtons = getBaseWindowButtons(win);
-
-    // let maxBackgroundSizeOfButton = baseWindowButtons.reduce(
-    //     (value, a) => {
-    //         let aRect = a.getBoundingClientRect();
-    //
-    //         return Math.max(
-    //             aRect.height, aRect.width, value
-    //         )
-    //     }, 0
-    // );
-    // baseWindowButtons.forEach(button => {
-    //     button.style.height = `${maxBackgroundSizeOfButton}px`;
-    //     button.style.width = `${maxBackgroundSizeOfButton}px`
-    // })
 
     baseWindowButtons.forEach(button => windowControls.appendChild(button));
 
