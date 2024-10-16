@@ -76,11 +76,9 @@ body {
 
 .window-header .minimize-btn {
     background-color: orange;
-    margin-left: 5px;
 }
 
 .window-header .fullscreen-btn {
     background-color: green;
-    margin-left: 5px;
 }
 
