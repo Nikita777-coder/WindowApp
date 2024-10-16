@@ -95,6 +95,20 @@ function createWindow(windowId) {
 
     let baseWindowButtons = getBaseWindowButtons(win);
 
+    // let maxBackgroundSizeOfButton = baseWindowButtons.reduce(
+    //     (value, a) => {
+    //         let aRect = a.getBoundingClientRect();
+    //
+    //         return Math.max(
+    //             aRect.height, aRect.width, value
+    //         )
+    //     }, 0
+    // );
+    // baseWindowButtons.forEach(button => {
+    //     button.style.height = `${maxBackgroundSizeOfButton}px`;
+    //     button.style.width = `${maxBackgroundSizeOfButton}px`
+    // })
+
     baseWindowButtons.forEach(button => windowControls.appendChild(button));
 
     header.appendChild(windowTitle);
