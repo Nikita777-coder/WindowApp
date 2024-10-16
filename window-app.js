@@ -39,17 +39,42 @@ function getBaseWindowButtons(win) {
     ];
 }
 
-function defineStartWinCoordinates(win) {
-    let lastwinCoordinates = document.body.children[document.body.children.length - 2]?.getBoundingClientRect();
-    win.style.position = 'absolute'; 
+function isWindowInMenu(windowId) {
+    let menuItemId = `menu-${windowId}`;
+    return document.getElementById(menuItemId) !== null;
+}
 
-    if (lastwinCoordinates) {
-        win.style.left = lastwinCoordinates.left + 50 + "px";
-        win.style.top = lastwinCoordinates.top + 50 + "px";
-    } else {
-        win.style.left = 10 + "px";
-        win.style.top = 10 + "px";
+function findFirstWindowNotInMenu(excludeWindowId) {
+    // Используем Array.from и фильтруем элементы, чтобы найти первое окно, которое не в меню
+    return Array.from(document.body.children).reverse().find((child) => child.id !== excludeWindowId && String(child.id).includes("window") && !isWindowInMenu(child.id));
+}
+
+function isAnyWindowInDocument() {
+    return Array.from(document.body.children).some((child) => String(child.id).includes("window"));
+}
+
+function defineStartWinCoordinates(win) {
+    let lastWin = document.body.children[document.body.children.length - 2]; // Предпоследний элемент
+
+    let left = 10;
+    let top = 10;
+
+    if (isAnyWindowInDocument()) {
+        if (!lastWin || isWindowInMenu(lastWin.id)) {
+            lastWin = findFirstWindowNotInMenu(win.id);
+        }
+
+        if (lastWin) {
+            let coordinates = lastWin.getBoundingClientRect();
+            left = coordinates.left + 40;  
+            top = coordinates.top + 40;    
+        }
     }
+
+    // Устанавливаем координаты для нового окна
+    win.style.position = 'absolute';
+    win.style.left = left + "px";
+    win.style.top = top + "px";
 }
 
 /**
