@@ -39,6 +39,19 @@ function getBaseWindowButtons(win) {
     ];
 }
 
+function defineStartWinCoordinates(win) {
+    let lastwinCoordinates = document.body.children[document.body.children.length - 2]?.getBoundingClientRect();
+    win.style.position = 'absolute'; 
+
+    if (lastwinCoordinates) {
+        win.style.left = lastwinCoordinates.left + 50 + "px";
+        win.style.top = lastwinCoordinates.top + 50 + "px";
+    } else {
+        win.style.left = 10 + "px";
+        win.style.top = 10 + "px";
+    }
+}
+
 /**
  * Create specified button without adding it to windows variable and without counting
  * @param windowId
@@ -68,6 +81,7 @@ function createWindow(windowId) {
     win.appendChild(header);
 
     document.body.appendChild(win);
+    defineStartWinCoordinates(win);
 
     makeDraggable(win);
 }
