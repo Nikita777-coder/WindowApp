@@ -1,3 +1,8 @@
+/**
+ * Window functional
+ * begin
+ */
+
 let windowCounter = 0;
 let windows = [];
 
@@ -227,10 +232,6 @@ function deepCloseWindow(windowId) {
     }
 }
 
-document.getElementById('addWindowBtn').addEventListener('click', () => {
-    createNewWindow();
-});
-
 function reboot() {
     let savedWindows = JSON.parse(localStorage.getItem('windows'));
     windows.forEach(window => deepCloseWindow(window.id));
@@ -247,14 +248,27 @@ function reboot() {
     }
 }
 
+/**
+ * Window functional
+ * end
+ */
+
+
+
+
+
+
+// add reaction when click to addWindowBtn
+document.getElementById('addWindowBtn').addEventListener('click', () => {
+    createNewWindow();
+});
+
+// add listeners when reboot and reget the previous state
 window.addEventListener('beforeunload', () => {
     localStorage.setItem('windows', JSON.stringify(windows));
     localStorage.setItem('windowCounter', JSON.stringify(windowCounter));
 });
 
-/**
- * Restore elements from previous state and rollback page to this state
- */
 window.addEventListener('keydown', (event) => {
     if (event.key === 'r' || event.key === 'R' || event.key === 'F5') {
         event.preventDefault();
