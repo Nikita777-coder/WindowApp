@@ -83,9 +83,11 @@ body {
 
 .window-controls .minimize-btn {
     background-color: orange;
+    margin-left: 5px;
 }
 
 .window-controls .fullscreen-btn {
     background-color: green;
+    margin-left: 5px;
 }
 
