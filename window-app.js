@@ -45,7 +45,6 @@ function isWindowInMenu(windowId) {
 }
 
 function findFirstWindowNotInMenu(excludeWindowId) {
-    // Используем Array.from и фильтруем элементы, чтобы найти первое окно, которое не в меню
     return Array.from(document.body.children).reverse().find((child) => child.id !== excludeWindowId && String(child.id).includes("window") && !isWindowInMenu(child.id));
 }
 
@@ -54,10 +53,9 @@ function isAnyWindowInDocument() {
 }
 
 function defineStartWinCoordinates(win) {
-    let lastWin = document.body.children[document.body.children.length - 2]; // Предпоследний элемент
-
-    let left = 10;
-    let top = 10;
+    let lastWin = document.body.children[document.body.children.length - 2]; 
+    let left = document.body.children[document.body.children.length - 1].getBoundingClientRect().left;
+    let top = document.body.children[document.body.children.length - 1].getBoundingClientRect().top;
 
     if (isAnyWindowInDocument()) {
         if (!lastWin || isWindowInMenu(lastWin.id)) {
@@ -66,12 +64,11 @@ function defineStartWinCoordinates(win) {
 
         if (lastWin) {
             let coordinates = lastWin.getBoundingClientRect();
-            left = coordinates.left + 40;  
-            top = coordinates.top + 40;    
+            left = coordinates.left + 0.17 * lastWin.offsetWidth;  
+            top = coordinates.top + 0.17 * lastWin.offsetWidth;    
         }
     }
 
-    // Устанавливаем координаты для нового окна
     win.style.position = 'absolute';
     win.style.left = left + "px";
     win.style.top = top + "px";
