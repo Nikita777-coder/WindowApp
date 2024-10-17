@@ -1,5 +1,5 @@
 /**
- * Window functional
+ * Window (for class allocation) functional
  * begin
  */
 
@@ -12,6 +12,9 @@ let windows = [];
  * @param textContent - button displayed name or symbols
  * @param onClick
  * @constructor
+ * 
+ * 
+ * May be can be allocated to class
  */
 function WindowButton(className, textContent, onClick) {
     this.button = document.createElement('button');
