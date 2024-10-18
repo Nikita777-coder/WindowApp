@@ -260,8 +260,11 @@ window.addEventListener('beforeunload', () => {
 /**
  * Restore elements from previous state and rollback page to this state
  */
+
+window.addEventListener('load', () => reboot())
+
 window.addEventListener('keydown', (event) => {
-    if (event.key === 'r' || event.key === 'R' || event.key === 'F5') {
+    if (event.key === 'r' || event.key === 'R') {
         event.preventDefault();
         reboot();
     }
