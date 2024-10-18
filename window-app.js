@@ -1,5 +1,6 @@
 let windowCounter = 0;
 let windows = [];
+let highestZIndex = 1;
 
 /**
  * Create new Button in window
@@ -101,9 +102,11 @@ function createWindow(windowId) {
     header.appendChild(windowControls);
 
     win.appendChild(header);
+    win.addEventListener('mousedown', () => makeWindowCurrent(win));
 
     document.body.appendChild(win);
     defineStartWinCoordinates(win);
+    win.style.zIndex = ++highestZIndex;
 
     makeDraggable(win);
 }
@@ -112,12 +115,16 @@ function extractNumFromWinId(winId) {
     return Number(winId.match(/\d+(\.\d+)?/)[0]);
 }
 
+function makeWindowCurrent(window) {
+    window.style.zIndex = ++highestZIndex;
+}
+
 function createNewWindow() {
     const winId = `window${windowCounter}`;
     createWindow(winId);
 
     let newWin = document.getElementById(winId);
-    windows.push({ id: winId, isMinimized: false, isFullscreen: false, top: newWin.style.top, left: newWin.style.left});
+    windows.push({ id: winId, isMinimized: false, isFullscreen: false, top: newWin.style.top, left: newWin.style.left, zIndex: newWin.style.zIndex});
     windowCounter++;
 }
 
@@ -201,7 +208,7 @@ function toggleFullscreen(win) {
 function makeDraggable(win) {
     let offsetX = 0, offsetY = 0, initialX = 0, initialY = 0;
 
-    win.onmousedown = dragMouseDown;
+    win.addEventListener('mousedown', (e) => dragMouseDown(e)); 
 
     function dragMouseDown(e) {
         e.preventDefault();
@@ -256,6 +263,7 @@ function reboot() {
             let newWin = document.getElementById(window.id);
             newWin.style.top = window.top;
             newWin.style.left = window.left;
+            newWin.style.zIndex = window.zIndex;
         });
         savedClosedWindows.forEach(window => minimizeWindow(window.id))
     } else {
@@ -263,17 +271,18 @@ function reboot() {
     }
 }
 
-function restoreWindowsPositions() {
+function restoreWindowsParams() {
     windows.forEach(window => {
-        let documentWinChildStylePositoins = document.getElementById(window.id).style;
+        let documentWinChildStyle = document.getElementById(window.id).style;
 
-        window.top = documentWinChildStylePositoins.top;
-        window.left = documentWinChildStylePositoins.left;
+        window.top = documentWinChildStyle.top;
+        window.left = documentWinChildStyle.left;
+        window.zIndex = documentWinChildStyle.zIndex;
     })
 }
 
 window.addEventListener('beforeunload', () => {
-    restoreWindowsPositions();
+    restoreWindowsParams();
     localStorage.setItem('windows', JSON.stringify(windows));
     localStorage.setItem('windowCounter', JSON.stringify(windowCounter));
 });
