@@ -121,6 +121,11 @@ function closeWindow(windowId) {
     if (win) {
         win.remove();
         windows = windows.filter(w => w.id !== windowId);
+        windowCounter = Math.max(...windows.map(child => {
+            let numWinId = Number(child.id.match(/\d+(\.\d+)?/)[0]);
+            return numWinId;
+        }))
+        windowCounter++;
     }
 }
 
