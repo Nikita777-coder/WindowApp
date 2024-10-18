@@ -30,12 +30,19 @@ function getBaseWindowButtons(win) {
         new WindowButton(
             'minimize-btn',
             '-',
-            () => minimizeWindow(win.id)
+            () => {
+                minimizeWindow(win.id)
+                saveWindowState(win.id)
+            }
         ).button,
         new WindowButton(
             'close-btn',
             'X',
-            () => closeWindow(win.id)
+            () => {
+                let winId = win.id;
+                closeWindow(win.id)
+                saveWindowState(winId);
+            }
         ).button
     ];
 }
@@ -126,6 +133,7 @@ function createNewWindow() {
     let newWin = document.getElementById(winId);
     windows.push({ id: winId, isMinimized: false, isFullscreen: false, top: newWin.style.top, left: newWin.style.left, zIndex: newWin.style.zIndex});
     windowCounter++;
+    saveWindowState(winId)
 }
 
 function closeWindow(windowId) {
@@ -185,6 +193,7 @@ function restoreWindow(windowId) {
         if (listItem) {
             listItem.remove();
         }
+        saveWindowState(windowId);
     }
 }
 
@@ -214,6 +223,8 @@ function makeDraggable(win) {
         e.preventDefault();
         initialX = e.clientX;
         initialY = e.clientY;
+        console.log(e.clientX, e.clientY)
+        console.log(e)
         document.onmouseup = closeDragElement;
         document.onmousemove = elementDrag;
     }
@@ -230,6 +241,7 @@ function makeDraggable(win) {
     }
 
     function closeDragElement() {
+        saveWindowState(win.id);
         document.onmouseup = null;
         document.onmousemove = null;
     }
@@ -281,21 +293,72 @@ function restoreWindowsParams() {
     })
 }
 
-window.addEventListener('beforeunload', () => {
-    restoreWindowsParams();
-    localStorage.setItem('windows', JSON.stringify(windows));
-    localStorage.setItem('windowCounter', JSON.stringify(windowCounter));
-});
+function createProgressBar(text) {
+    let progressBar = document.createElement('progress');
+    progressBar.max = 100;
+    progressBar.value = 0;
 
-/**
- * Restore elements from previous state and rollback page to this state
- */
+    let label = document.createElement('label');
+    label.textContent = text;
+    label.htmlFor = progressBar.id;
 
-window.addEventListener('load', () => reboot())
+    let container = document.createElement('div');
+    container.id = text;
+    container.style.position = 'fixed';
+    container.style.top = '50%';
+    container.style.left = '50%';
+    container.style.transform = 'translate(-50%, -50%)';  
+    container.style.textAlign = 'center';  
+    container.style.backgroundColor = 'rgba(0, 0, 0, 0.7)';  
+    container.style.padding = '20px';
+    container.style.borderRadius = '10px';
+    container.style.color = 'white';  
 
-window.addEventListener('keydown', (event) => {
-    if (event.key === 'r' || event.key === 'R') {
-        event.preventDefault();
-        reboot();
-    }
+    container.appendChild(label);
+    container.appendChild(progressBar);
+    document.body.appendChild(container);
+}
+
+function simulateFileUpload(text, ms) {
+    return new Promise((resolve, reject) => {
+        createProgressBar(text)
+        let container = document.getElementById(text)
+        container.style.zIndex = ++highestZIndex;
+
+        let width = 0;
+        let interval = setInterval(() => {
+            width += Math.floor(Math.random() * 16 + 5);
+            container.children[1].value = width;
+
+            if (width >= 100) {
+                clearInterval(interval);
+                container.remove();
+                resolve("Upload complete");
+            }
+        }, ms);
+    });
+}
+
+function restoreWindowParams(winId) {
+    windows.filter(el => el.id == winId).forEach(window => {
+        let documentWinChildStyle = document.getElementById(window.id).style;
+
+        window.top = documentWinChildStyle.top;
+        window.left = documentWinChildStyle.left;
+        window.zIndex = documentWinChildStyle.zIndex;
+    })
+}
+
+function saveWindowState(winId) {
+    simulateFileUpload(`Информация об окне ${+(winId.replace('window', '')) + 1} сохраняется: `, 500).then(() => {
+        restoreWindowParams(winId);
+        localStorage.setItem('windows', JSON.stringify(windows));
+        localStorage.setItem('windowCounter', JSON.stringify(windowCounter));
+    });
+}
+
+window.addEventListener('load', () => {
+    simulateFileUpload("Получение окон с сервера: ", 1000).then(() => {
+        reboot(); 
+    });
 });
