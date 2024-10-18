@@ -108,11 +108,16 @@ function createWindow(windowId) {
     makeDraggable(win);
 }
 
+function extractNumFromWinId(winId) {
+    return Number(winId.match(/\d+(\.\d+)?/)[0]);
+}
+
 function createNewWindow() {
     const winId = `window${windowCounter}`;
     createWindow(winId);
 
-    windows.push({ id: winId, isMinimized: false, isFullscreen: false });
+    let newWin = document.getElementById(winId);
+    windows.push({ id: winId, isMinimized: false, isFullscreen: false, top: newWin.style.top, left: newWin.style.left});
     windowCounter++;
 }
 
@@ -122,7 +127,7 @@ function closeWindow(windowId) {
         win.remove();
         windows = windows.filter(w => w.id !== windowId);
         windowCounter = Math.max(...windows.map(child => {
-            let numWinId = Number(child.id.match(/\d+(\.\d+)?/)[0]);
+            let numWinId = extractNumFromWinId(child.id);
             return numWinId;
         }))
         windowCounter++;
@@ -245,14 +250,30 @@ function reboot() {
         windows = savedWindows
         let savedClosedWindows = windows.filter(window => window.isMinimized === true);
 
-        windows.forEach(window => createWindow(window.id));
+        windows.forEach(window => {
+            createWindow(window.id)
+
+            let newWin = document.getElementById(window.id);
+            newWin.style.top = window.top;
+            newWin.style.left = window.left;
+        });
         savedClosedWindows.forEach(window => minimizeWindow(window.id))
     } else {
         windowCounter = 0;
     }
 }
 
+function restoreWindowsPositions() {
+    windows.forEach(window => {
+        let documentWinChildStylePositoins = document.getElementById(window.id).style;
+
+        window.top = documentWinChildStylePositoins.top;
+        window.left = documentWinChildStylePositoins.left;
+    })
+}
+
 window.addEventListener('beforeunload', () => {
+    restoreWindowsPositions();
     localStorage.setItem('windows', JSON.stringify(windows));
     localStorage.setItem('windowCounter', JSON.stringify(windowCounter));
 });
