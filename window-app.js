@@ -1,6 +1,6 @@
 let windowCounter = 0;
 let windows = [];
-let highestZIndex = 1;
+let previousCurrentElementZIndex;
 
 /**
  * Create new Button in window
@@ -109,12 +109,11 @@ function createWindow(windowId) {
     header.appendChild(windowControls);
 
     win.appendChild(header);
-    win.addEventListener('mousedown', () => makeWindowCurrent(win));
+    win.addEventListener('mousedown', () => makeElementCurrent(win));
 
     document.body.appendChild(win);
     defineStartWinCoordinates(win);
-    win.style.zIndex = ++highestZIndex;
-
+    makeElementCurrent(win);
     makeDraggable(win);
 }
 
@@ -122,8 +121,14 @@ function extractNumFromWinId(winId) {
     return Number(winId.match(/\d+(\.\d+)?/)[0]);
 }
 
-function makeWindowCurrent(window) {
-    window.style.zIndex = ++highestZIndex;
+function makeElementCurrent(window) {
+    window.style.zIndex = '1';
+
+    if (previousCurrentElementZIndex) {
+        window.style.zIndex = `${previousCurrentElementZIndex + 1}`;
+    }
+
+    previousCurrentElementZIndex = +window.style.zIndex;
 }
 
 function createNewWindow() {
@@ -142,8 +147,7 @@ function closeWindow(windowId) {
         win.remove();
         windows = windows.filter(w => w.id !== windowId);
         windowCounter = Math.max(...windows.map(child => {
-            let numWinId = extractNumFromWinId(child.id);
-            return numWinId;
+            return extractNumFromWinId(child.id);
         }))
         windowCounter++;
     }
@@ -193,6 +197,8 @@ function restoreWindow(windowId) {
         if (listItem) {
             listItem.remove();
         }
+        
+        makeElementCurrent(win);
         saveWindowState(windowId);
     }
 }
@@ -225,6 +231,7 @@ function makeDraggable(win) {
         initialY = e.clientY;
         console.log(e.clientX, e.clientY)
         console.log(e)
+        makeElementCurrent(win);
         document.onmouseup = closeDragElement;
         document.onmousemove = elementDrag;
     }
@@ -325,7 +332,7 @@ function simulateFileUpload(text, ms) {
 
         createProgressBar(text)
         let container = document.getElementById(text)
-        container.style.zIndex = ++highestZIndex;
+        makeElementCurrent(container);
 
         let width = 0;
         let interval = setInterval(() => {
@@ -334,8 +341,7 @@ function simulateFileUpload(text, ms) {
 
             if (width >= 100) {
                 clearInterval(interval);
-                container.remove();
-                resolve("Upload complete");
+                resolve(container);
                 document.body.style.pointerEvents = 'auto';
             }
         }, ms);
@@ -353,7 +359,8 @@ function restoreWindowParams(winId) {
 }
 
 function saveWindowState(winId) {
-    simulateFileUpload(`Информация об окне ${+(winId.replace('window', '')) + 1} сохраняется: `, 500).then(() => {
+    simulateFileUpload(`Информация об окне ${+(winId.replace('window', '')) + 1} сохраняется: `, 500).then((container) => {
+        container.remove();
         restoreWindowParams(winId);
         localStorage.setItem('windows', JSON.stringify(windows));
         localStorage.setItem('windowCounter', JSON.stringify(windowCounter));
@@ -361,7 +368,8 @@ function saveWindowState(winId) {
 }
 
 window.addEventListener('load', () => {
-    simulateFileUpload("Получение окон с сервера: ", 1000).then(() => {
+    simulateFileUpload("Получение окон с сервера: ", 1000).then((container) => {
+        container.remove();
         reboot(); 
     });
 });
