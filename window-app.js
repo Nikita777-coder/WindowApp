@@ -321,6 +321,8 @@ function createProgressBar(text) {
 
 function simulateFileUpload(text, ms) {
     return new Promise((resolve, reject) => {
+        document.body.style.pointerEvents = 'none';
+
         createProgressBar(text)
         let container = document.getElementById(text)
         container.style.zIndex = ++highestZIndex;
@@ -334,13 +336,14 @@ function simulateFileUpload(text, ms) {
                 clearInterval(interval);
                 container.remove();
                 resolve("Upload complete");
+                document.body.style.pointerEvents = 'auto';
             }
         }, ms);
     });
 }
 
 function restoreWindowParams(winId) {
-    windows.filter(el => el.id == winId).forEach(window => {
+    windows.filter(el => el.id === winId).forEach(window => {
         let documentWinChildStyle = document.getElementById(window.id).style;
 
         window.top = documentWinChildStyle.top;
