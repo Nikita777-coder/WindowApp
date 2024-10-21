@@ -365,3 +365,7 @@ window.addEventListener('load', () => {
         reboot(); 
     });
 });
+
+window.addEventListener('unhandledrejection', function(event) {
+    document.body.style.pointerEvents = 'auto';
+});
