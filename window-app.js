@@ -290,16 +290,6 @@ function reboot() {
     }
 }
 
-function restoreWindowsParams() {
-    windows.forEach(window => {
-        let documentWinChildStyle = document.getElementById(window.id).style;
-
-        window.top = documentWinChildStyle.top;
-        window.left = documentWinChildStyle.left;
-        window.zIndex = documentWinChildStyle.zIndex;
-    })
-}
-
 function createProgressBar(text) {
     let progressBar = document.createElement('progress');
     progressBar.max = 100;
