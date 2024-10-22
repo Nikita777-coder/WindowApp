@@ -1,51 +1,34 @@
 let windowCounter = 0;
 let windows = [];
+let classWindows = new Map();
 let highestZIndex = 1;
 
-/**
- * Create new Button in window
- * @param className
- * @param textContent - button displayed name or symbols
- * @param onClick
- * @constructor
- */
-function WindowButton(className, textContent, onClick) {
-    this.button = document.createElement('button');
-    this.button.className = className;
-    this.button.textContent = textContent;
-    this.button.onclick = onClick;
-
-    Object.defineProperty(this, 'button', {
-        configurable: false
-    });
-}
-
-function getBaseWindowButtons(win) {
-    return [
-        new WindowButton(
-            'fullscreen-btn',
-            '[ ]',
-            () => toggleFullscreen(win)
-        ).button,
-        new WindowButton(
-            'minimize-btn',
-            '-',
-            () => {
-                minimizeWindow(win.id)
-                saveWindowState(win.id)
-            }
-        ).button,
-        new WindowButton(
-            'close-btn',
-            'X',
-            () => {
-                let winId = win.id;
-                closeWindow(win.id)
-                saveWindowState(winId);
-            }
-        ).button
-    ];
-}
+// function getBaseWindowButtons(win) {
+//     return [
+//         new WindowButton(
+//             'fullscreen-btn',
+//             '[ ]',
+//             () => toggleFullscreen(win)
+//         ).button,
+//         new WindowButton(
+//             'minimize-btn',
+//             '-',
+//             () => {
+//                 minimizeWindow(win.id)
+//                 saveWindowState(win.id)
+//             }
+//         ).button,
+//         new WindowButton(
+//             'close-btn',
+//             'X',
+//             () => {
+//                 let winId = win.id;
+//                 closeWindow(win.id)
+//                 saveWindowState(winId);
+//             }
+//         ).button
+//     ];
+// }
 
 function isWindowInMenu(windowId) {
     let menuItemId = `menu-${windowId}`;
@@ -86,36 +69,36 @@ function defineStartWinCoordinates(win) {
  * Create specified button without adding it to windows variable and without counting
  * @param windowId
  */
-function createWindow(windowId) {
-    const win = document.createElement('div');
-    win.className = 'window';
-    win.id = windowId;
+// function createWindow(windowId) {
+//     const win = document.createElement('div');
+//     win.className = 'window';
+//     win.id = windowId;
 
-    const header = document.createElement('div');
-    header.className = 'window-header';
+//     const header = document.createElement('div');
+//     header.className = 'window-header';
 
-    const windowTitle = document.createElement('div');
-    windowTitle.className = 'window-title';
-    windowTitle.textContent = `Окно ${+(windowId.replace('window', '')) + 1}`;
+//     const windowTitle = document.createElement('div');
+//     windowTitle.className = 'window-title';
+//     windowTitle.textContent = `Окно ${+(windowId.replace('window', '')) + 1}`;
 
-    const windowControls = document.createElement('div');
-    windowControls.className = 'window-controls';
+//     const windowControls = document.createElement('div');
+//     windowControls.className = 'window-controls';
 
-    let baseWindowButtons = getBaseWindowButtons(win);
+//     let baseWindowButtons = getBaseWindowButtons(win);
 
-    baseWindowButtons.forEach(button => windowControls.appendChild(button));
+//     baseWindowButtons.forEach(button => windowControls.appendChild(button));
 
-    header.appendChild(windowTitle);
-    header.appendChild(windowControls);
+//     header.appendChild(windowTitle);
+//     header.appendChild(windowControls);
 
-    win.appendChild(header);
-    win.addEventListener('mousedown', () => makeElementCurrent(win));
+//     win.appendChild(header);
+//     win.addEventListener('mousedown', () => makeElementCurrent(win));
 
-    document.body.appendChild(win);
-    defineStartWinCoordinates(win);
-    makeElementCurrent(win);
-    makeDraggable(win);
-}
+//     document.body.appendChild(win);
+//     defineStartWinCoordinates(win);
+//     makeElementCurrent(win);
+//     makeDraggable(win);
+// }
 
 function extractNumFromWinId(winId) {
     return Number(winId.match(/\d+(\.\d+)?/)[0]);
@@ -127,7 +110,7 @@ function makeElementCurrent(win) {
 
 function createNewWindow() {
     const winId = `window${windowCounter}`;
-    createWindow(winId);
+    classWindows.set(winId, new Window());
 
     let newWin = document.getElementById(winId);
     windows.push({ id: winId, isMinimized: false, isFullscreen: false, top: newWin.style.top, left: newWin.style.left, zIndex: newWin.style.zIndex});
@@ -135,31 +118,31 @@ function createNewWindow() {
     saveWindowState(winId)
 }
 
-function closeWindow(windowId) {
-    const win = document.getElementById(windowId);
-    if (win) {
-        win.remove();
-        windows = windows.filter(w => w.id !== windowId);
-        windowCounter = Math.max(...windows.map(child => {
-            return extractNumFromWinId(child.id);
-        }))
-        windowCounter++;
-    }
-}
+// function closeWindow(windowId) {
+//     const win = document.getElementById(windowId);
+//     if (win) {
+//         win.remove();
+//         windows = windows.filter(w => w.id !== windowId);
+//         windowCounter = Math.max(...windows.map(child => {
+//             return extractNumFromWinId(child.id);
+//         }))
+//         windowCounter++;
+//     }
+// }
 
 /**
  * Delete window from page
  * @param windowId
  */
-function minimizeWindow(windowId) {
-    const win = document.getElementById(windowId);
-    if (win) {
-        win.style.display = 'none';
-        const windowInfo = windows.find(w => w.id === windowId);
-        windowInfo.isMinimized = true;
-        addToMenu(windowId);
-    }
-}
+// function minimizeWindow(windowId) {
+//     const win = document.getElementById(windowId);
+//     if (win) {
+//         win.style.display = 'none';
+//         const windowInfo = windows.find(w => w.id === windowId);
+//         windowInfo.isMinimized = true;
+//         addToMenu(windowId);
+//     }
+// }
 
 /**
  * Add window to menu
@@ -169,7 +152,7 @@ function addToMenu(windowId) {
     const listItem = document.createElement('li');
     listItem.id = `menu-${windowId}`;
     listItem.textContent = `Окно ${+(windowId.replace('window', '')) + 1}`;
-    listItem.onclick = () => restoreWindow(windowId);
+    listItem.onclick = () => classWindows.get(windowId).restoreWindow();
     document.getElementById('windowList').appendChild(listItem);
 }
 
@@ -177,77 +160,77 @@ function addToMenu(windowId) {
  * Delete button from menu and add it to page
  * @param windowId
  */
-function restoreWindow(windowId) {
-    const win = document.getElementById(windowId);
-    if (win) {
-        win.style.display = 'block';
-        const windowInfo = windows.find(w => w.id === windowId && w.isMinimized === true);
+// function restoreWindow(windowId) {
+//     const win = document.getElementById(windowId);
+//     if (win) {
+//         win.style.display = 'block';
+//         const windowInfo = windows.find(w => w.id === windowId && w.isMinimized === true);
 
-        if (windowInfo) {
-            windowInfo.isMinimized = false;
-        }
+//         if (windowInfo) {
+//             windowInfo.isMinimized = false;
+//         }
 
-        const listItem = document.getElementById(`menu-${windowId}`);
-        if (listItem) {
-            listItem.remove();
-        }
+//         const listItem = document.getElementById(`menu-${windowId}`);
+//         if (listItem) {
+//             listItem.remove();
+//         }
         
-        saveWindowState(windowId);
-    }
-}
+//         saveWindowState(windowId);
+//     }
+// }
 
-function windowStyle(win, width, height, top, left) {
-    win.style.width = width;
-    win.style.height = height;
-    win.style.top = top;
-    win.style.left = left;
-}
+// function windowStyle(win, width, height, top, left) {
+//     win.style.width = width;
+//     win.style.height = height;
+//     win.style.top = top;
+//     win.style.left = left;
+// }
 
-function toggleFullscreen(win) {
-    const windowInfo = windows.find(w => w.id === win.id && w.isMinimized === false);
+// function toggleFullscreen(win) {
+//     const windowInfo = windows.find(w => w.id === win.id && w.isMinimized === false);
 
-    windowInfo.isFullscreen ?
-        windowStyle(win, '300px','200px', '100px', '100px') :
-        windowStyle(win, '100vw', '100vh', '0', '0');
+//     windowInfo.isFullscreen ?
+//         windowStyle(win, '300px','200px', '100px', '100px') :
+//         windowStyle(win, '100vw', '100vh', '0', '0');
 
-    windowInfo.isFullscreen = !windowInfo.isFullscreen;
-}
+//     windowInfo.isFullscreen = !windowInfo.isFullscreen;
+// }
 
-function makeDraggable(win) {
-    let offsetX = 0, offsetY = 0, initialX = 0, initialY = 0;
+// function makeDraggable(win) {
+//     let offsetX = 0, offsetY = 0, initialX = 0, initialY = 0;
 
-    win.addEventListener('mousedown', (e) => dragMouseDown(e)); 
+//     win.addEventListener('mousedown', (e) => dragMouseDown(e)); 
 
-    function dragMouseDown(e) {
-        e.preventDefault();
-        initialX = e.clientX;
-        initialY = e.clientY;
-        console.log(e.clientX, e.clientY)
-        console.log(e)
-        document.onmouseup = closeDragElement;
-        document.onmousemove = elementDrag;
-    }
+//     function dragMouseDown(e) {
+//         e.preventDefault();
+//         initialX = e.clientX;
+//         initialY = e.clientY;
+//         console.log(e.clientX, e.clientY)
+//         console.log(e)
+//         document.onmouseup = closeDragElement;
+//         document.onmousemove = elementDrag;
+//     }
 
-    function elementDrag(e) {
-        e.preventDefault();
-        offsetX = initialX - e.clientX;
-        offsetY = initialY - e.clientY;
-        initialX = e.clientX;
-        initialY = e.clientY;
+//     function elementDrag(e) {
+//         e.preventDefault();
+//         offsetX = initialX - e.clientX;
+//         offsetY = initialY - e.clientY;
+//         initialX = e.clientX;
+//         initialY = e.clientY;
 
-        win.style.top = (win.offsetTop - offsetY) + "px";
-        win.style.left = (win.offsetLeft - offsetX) + "px";
-    }
+//         win.style.top = (win.offsetTop - offsetY) + "px";
+//         win.style.left = (win.offsetLeft - offsetX) + "px";
+//     }
 
-    function closeDragElement() {
-        saveWindowState(win.id);
-        document.onmouseup = null;
-        document.onmousemove = null;
-    }
-}
+//     function closeDragElement() {
+//         saveWindowState(win.id);
+//         document.onmouseup = null;
+//         document.onmousemove = null;
+//     }
+// }
 
 function deepCloseWindow(windowId) {
-    closeWindow(windowId);
+    classWindows.get(windowId).closeWindow();
 
     const listItem = document.getElementById(`menu-${windowId}`);
     if (listItem) {
@@ -269,7 +252,7 @@ function reboot() {
         let savedClosedWindows = windows.filter(window => window.isMinimized === true);
 
         windows.forEach(window => {
-            createWindow(window.id)
+            classWindows.set(window.id, new Window(window.id));
 
             let newWin = document.getElementById(window.id);
             newWin.style.top = window.top;
@@ -277,7 +260,8 @@ function reboot() {
             newWin.style.zIndex = window.zIndex;
             highestZIndex = Math.max(+newWin.style.zIndex, highestZIndex);
         });
-        savedClosedWindows.forEach(window => minimizeWindow(window.id))
+        
+        savedClosedWindows.forEach(window => classWindows.get(window.id).minimizeWindow())
     } else {
         windowCounter = 0;
     }
