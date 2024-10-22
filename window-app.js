@@ -1,6 +1,6 @@
 let windowCounter = 0;
 let windows = [];
-let previousCurrentElementZIndex;
+let maxElementZIndex = 0;
 
 /**
  * Create new Button in window
@@ -124,11 +124,11 @@ function extractNumFromWinId(winId) {
 function makeElementCurrent(window) {
     window.style.zIndex = '1';
 
-    if (previousCurrentElementZIndex) {
-        window.style.zIndex = `${previousCurrentElementZIndex + 1}`;
+    if (maxElementZIndex) {
+        window.style.zIndex = `${maxElementZIndex + 1}`;
     }
 
-    previousCurrentElementZIndex = +window.style.zIndex;
+    maxElementZIndex = Math.max(+window.style.zIndex, maxElementZIndex);
 }
 
 function createNewWindow() {
@@ -198,7 +198,6 @@ function restoreWindow(windowId) {
             listItem.remove();
         }
         
-        makeElementCurrent(win);
         saveWindowState(windowId);
     }
 }
@@ -231,7 +230,6 @@ function makeDraggable(win) {
         initialY = e.clientY;
         console.log(e.clientX, e.clientY)
         console.log(e)
-        makeElementCurrent(win);
         document.onmouseup = closeDragElement;
         document.onmousemove = elementDrag;
     }
@@ -283,6 +281,7 @@ function reboot() {
             newWin.style.top = window.top;
             newWin.style.left = window.left;
             newWin.style.zIndex = window.zIndex;
+            previousCurrentElementZIndex = +newWin.style.zIndex;
         });
         savedClosedWindows.forEach(window => minimizeWindow(window.id))
     } else {
