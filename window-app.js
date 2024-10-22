@@ -293,16 +293,17 @@ function createProgressBar(text) {
     label.htmlFor = progressBar.id;
 
     let container = document.createElement('div');
+    container.className = 'container-progress-bar';
     container.id = `container-${text}`;
-    container.style.position = 'fixed';
-    container.style.top = '50%';
-    container.style.left = '50%';
-    container.style.transform = 'translate(-50%, -50%)';  
-    container.style.textAlign = 'center';  
-    container.style.backgroundColor = 'rgba(0, 0, 0, 0.7)';  
-    container.style.padding = '20px';
-    container.style.borderRadius = '10px';
-    container.style.color = 'white';  
+    // container.style.position = 'fixed';
+    // container.style.top = '50%';
+    // container.style.left = '50%';
+    // container.style.transform = 'translate(-50%, -50%)';  
+    // container.style.textAlign = 'center';  
+    // container.style.backgroundColor = 'rgba(0, 0, 0, 0.7)';  
+    // container.style.padding = '20px';
+    // container.style.borderRadius = '10px';
+    // container.style.color = 'white';  
 
     container.appendChild(label);
     container.appendChild(progressBar);
