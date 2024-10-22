@@ -313,6 +313,10 @@ function createProgressBar(text) {
 
 function simulateFileUpload(text, ms) {
     return new Promise((resolve, reject) => {
+        window.onbeforeunload = (event) => {
+            event.preventDefault();
+        };
+
         document.body.style.pointerEvents = 'none';
 
         let container = createProgressBar(text);
@@ -324,6 +328,7 @@ function simulateFileUpload(text, ms) {
             container.children[1].value = width;
 
             if (width >= 100) {
+                window.onbeforeunload = (event) => {};
                 clearInterval(interval);
                 resolve(container);
                 document.body.style.pointerEvents = 'auto';
@@ -351,6 +356,11 @@ function saveWindowState(winId) {
     });
 }
 
+function cleanStorage() {
+    localStorage.removeItem('windows');
+    localStorage.removeItem('windowCounter');
+}
+
 window.addEventListener('load', () => {
     simulateFileUpload("Получение окон с сервера: ", 1000).then((container) => {
         container.remove();
@@ -359,6 +369,7 @@ window.addEventListener('load', () => {
 });
 
 window.addEventListener('unhandledrejection', function(event) {
+    window.onbeforeunload = (event) => {};
     Array.from(document.querySelectorAll('#container')).forEach(el => el.remove());
     document.body.style.pointerEvents = 'auto';
 });
