@@ -1,6 +1,6 @@
 let windowCounter = 0;
 let windows = [];
-let maxElementZIndex = 0;
+let highestZIndex = 1;
 
 /**
  * Create new Button in window
@@ -122,9 +122,7 @@ function extractNumFromWinId(winId) {
 }
 
 function makeElementCurrent(win) {
-    maxElementZIndex = Math.max(...Array.from(document.querySelectorAll('#window #container')).map(el => +el.style.zIndex || 0), maxElementZIndex);
-    win.style.zIndex = `${maxElementZIndex + 1}`;
-    maxElementZIndex++;
+    win.style.zIndex = `${++highestZIndex}`;
 }
 
 function createNewWindow() {
@@ -277,7 +275,7 @@ function reboot() {
             newWin.style.top = window.top;
             newWin.style.left = window.left;
             newWin.style.zIndex = window.zIndex;
-            previousCurrentElementZIndex = +newWin.style.zIndex;
+            highestZIndex = Math.max(+newWin.style.zIndex, highestZIndex);
         });
         savedClosedWindows.forEach(window => minimizeWindow(window.id))
     } else {
