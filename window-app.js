@@ -121,14 +121,10 @@ function extractNumFromWinId(winId) {
     return Number(winId.match(/\d+(\.\d+)?/)[0]);
 }
 
-function makeElementCurrent(window) {
-    window.style.zIndex = '1';
-
-    if (maxElementZIndex) {
-        window.style.zIndex = `${maxElementZIndex + 1}`;
-    }
-
-    maxElementZIndex = Math.max(+window.style.zIndex, maxElementZIndex);
+function makeElementCurrent(win) {
+    maxElementZIndex = Math.max(...Array.from(document.querySelectorAll('#window #container')).map(el => +el.style.zIndex || 0), maxElementZIndex);
+    win.style.zIndex = `${maxElementZIndex + 1}`;
+    maxElementZIndex++;
 }
 
 function createNewWindow() {
@@ -299,7 +295,7 @@ function createProgressBar(text) {
     label.htmlFor = progressBar.id;
 
     let container = document.createElement('div');
-    container.id = text;
+    container.id = `container-${text}`;
     container.style.position = 'fixed';
     container.style.top = '50%';
     container.style.left = '50%';
@@ -313,14 +309,15 @@ function createProgressBar(text) {
     container.appendChild(label);
     container.appendChild(progressBar);
     document.body.appendChild(container);
+
+    return container;
 }
 
 function simulateFileUpload(text, ms) {
     return new Promise((resolve, reject) => {
         document.body.style.pointerEvents = 'none';
 
-        createProgressBar(text)
-        let container = document.getElementById(text)
+        let container = createProgressBar(text);
         makeElementCurrent(container);
 
         let width = 0;
@@ -364,5 +361,6 @@ window.addEventListener('load', () => {
 });
 
 window.addEventListener('unhandledrejection', function(event) {
+    Array.from(document.querySelectorAll('#container')).forEach(el => el.remove());
     document.body.style.pointerEvents = 'auto';
 });
