@@ -19,3 +19,8 @@ export function removeFromMenu(windowId) {
         listItem.remove();
     }
 }
+
+export function isWindowInMenu(windowId) {
+    let menuItemId = `menu-${windowId}`;
+    return document.getElementById(menuItemId) !== null;
+}

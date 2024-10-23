@@ -1,86 +1,53 @@
-import * as commons from "./common.js";
-import { removeFromMenu, addToMenu } from "./menu.js";
-import { saveWindowState } from "./storage.js";
-
-/**
- * Create new Button in window
- * @param className
- * @param textContent - button displayed name or symbols
- * @param onClick
- * @constructor
- */
-function WindowButton(className, textContent, onClick) {
-    this.button = document.createElement('button');
-    this.button.className = className;
-    this.button.textContent = textContent;
-    this.button.onclick = onClick;
-
-    Object.defineProperty(this, 'button', {
-        configurable: false
-    });
-}
-
-function isWindowInMenu(windowId) {
-    let menuItemId = `menu-${windowId}`;
-    return document.getElementById(menuItemId) !== null;
-}
-
-function findFirstWindowNotInMenu(excludeWindowId) {
-    return Array.from(document.body.children).reverse().find((child) => child.id !== excludeWindowId && String(child.id).includes("window") && !isWindowInMenu(child.id));
-}
-
-function isAnyWindowInDocument() {
-    return Array.from(document.body.children).some((child) => String(child.id).includes("window"));
-}
-
-function extractNumFromWinId(winId) {
-    return Number(winId.match(/\d+(\.\d+)?/)[0]);
-}
+import * as commons from "../common.js";
+import { removeFromMenu, addToMenu, isWindowInMenu } from "../menu.js";
+import { saveWindowState } from "../storage.js";
+import { WindowButton } from "./window-button.js";
+import { WindowUtils } from "./window-utils.js";
 
 class Window {
-    win;
+    #win;
     
     constructor(windowId) {
-        this.win = document.createElement('div');
+        this.#win = document.createElement('div');
         this.#createWindow(windowId);
     }
 
     closeWindow() {
-        if (this.win) {
-            this.win.remove();
-            commons.setValue("windowsCash", commons.windowsCash.filter(w => w.id !== this.win.id));
+        if (this.#win) {
+            this.#win.remove();
+            commons.setValue("windowsCash", commons.windowsCash.filter(w => w.id !== this.#win.id));
             commons.setValue("windowcounter", Math.max(...commons.windowsCash.map(child => {
-                return extractNumFromWinId(child.id);
+                return this.#extractNumFromWinId(child.id);
             })))
             commons.increaseWindowCounter();
         }
     }
 
     minimizeWindow() {
-        if (this.win) {
-            this.win.style.display = 'none';
-            const windowInfo = commons.windowsCash.find(w => w.id === this.win.id);
+        if (this.#win) {
+            this.#win.style.display = 'none';
+            const windowInfo = commons.windowsCash.find(w => w.id === this.#win.id);
             windowInfo.isMinimized = true;
-            addToMenu(this.win.id);
+            addToMenu(this.#win.id);
         }
     }
 
     restoreWindow() {
-        if (this.win) {
-            this.win.style.display = 'block';
-            const windowInfo = commons.windowsCash.find(w => w.id === this.win.id && w.isMinimized === true);
+        if (this.#win) {
+            this.#win.style.display = 'block';
+            const windowInfo = commons.windowsCash.find(w => w.id === this.#win.id && w.isMinimized === true);
     
             if (windowInfo) {
                 windowInfo.isMinimized = false;
             }
     
-            removeFromMenu(this.win.id);
-            saveWindowState(this.win.id);
+            removeFromMenu(this.#win.id);
+            saveWindowState(this.#win.id);
         }
     }
 
     toggleFullscreen() {
-        const windowInfo = commons.windowsCash.find(w => w.id === this.win.id && w.isMinimized === false);
+        const windowInfo = commons.windowsCash.find(w => w.id === this.#win.id && w.isMinimized === false);
 
         if (windowInfo.isFullscreen) {
             this.#windowStyle('300px', '200px', '100px', '100px');
@@ -95,12 +62,12 @@ class Window {
 
     deepCloseWindow() {
         this.closeWindow();
-        removeFromMenu(this.win.id);
+        removeFromMenu(this.#win.id);
     }
 
     #createWindow(windowId) {
-        this.win.className = 'window';
-        this.win.id = windowId;
+        this.#win.className = 'window';
+        this.#win.id = windowId;
 
         const header = document.createElement('div');
         header.className = 'window-header';
@@ -112,19 +79,19 @@ class Window {
         const windowControls = document.createElement('div');
         windowControls.className = 'window-controls';
 
-        let baseWindowButtons = this.#getBaseWindowButtons(this.win);
+        let baseWindowButtons = this.#getBaseWindowButtons(this.#win);
 
         baseWindowButtons.forEach(button => windowControls.appendChild(button));
 
         header.appendChild(windowTitle);
         header.appendChild(windowControls);
 
-        this.win.appendChild(header);
-        this.win.addEventListener('mousedown', () => commons.makeElementCurrent(this.win));
+        this.#win.appendChild(header);
+        this.#win.addEventListener('mousedown', () => commons.makeElementCurrent(this.#win));
 
-        document.body.appendChild(this.win);
+        document.body.appendChild(this.#win);
         this.#defineStartWinCoordinates();
-        commons.makeElementCurrent(this.win);
+        commons.makeElementCurrent(this.#win);
         this.#makeDraggable();
     }
 
@@ -133,9 +100,9 @@ class Window {
         let left = document.body.children[document.body.children.length - 1].getBoundingClientRect().left;
         let top = document.body.children[document.body.children.length - 1].getBoundingClientRect().top;
     
-        if (isAnyWindowInDocument()) {
+        if (WindowUtils.isAnyWindowInDocument()) {
             if (!lastWin || isWindowInMenu(lastWin.id)) {
-                lastWin = findFirstWindowNotInMenu(this.win.id);
+                lastWin = WindowUtils.findFirstWindowNotInMenu(this.#win.id);
             }
     
             if (lastWin) {
@@ -145,21 +112,21 @@ class Window {
             }
         }
     
-        this.win.style.position = 'absolute';
-        this.win.style.left = left + "px";
-        this.win.style.top = top + "px";
+        this.#win.style.position = 'absolute';
+        this.#win.style.left = left + "px";
+        this.#win.style.top = top + "px";
     }
 
     #removeDraggable() {
-        this.win.removeEventListener('mousedown', this.dragMouseDown);
-        saveWindowState(this.win.id);
+        this.#win.removeEventListener('mousedown', this.dragMouseDown);
+        saveWindowState(this.#win.id);
     }
 
     #makeDraggable() {
         const self = this; 
         let offsetX = 0, offsetY = 0, initialX = 0, initialY = 0;
 
-        this.win.addEventListener('mousedown', (e) => dragMouseDown(e)); 
+        this.#win.addEventListener('mousedown', (e) => dragMouseDown(e)); 
 
         this.dragMouseDown = (e) => {
             e.preventDefault();
@@ -176,24 +143,24 @@ class Window {
             initialX = e.clientX;
             initialY = e.clientY;
     
-            self.win.style.top = (self.win.offsetTop - offsetY) + "px";
-            self.win.style.left = (self.win.offsetLeft - offsetX) + "px";
+            self.#win.style.top = (self.#win.offsetTop - offsetY) + "px";
+            self.#win.style.left = (self.#win.offsetLeft - offsetX) + "px";
         };
     
         const closeDragElement = () => {
-            saveWindowState(self.win.id);
+            saveWindowState(self.#win.id);
             document.onmouseup = null;
             document.onmousemove = null;
         };
     
-        this.win.addEventListener('mousedown', this.dragMouseDown);
+        this.#win.addEventListener('mousedown', this.dragMouseDown);
     }
 
     #windowStyle(width, height, top, left) {
-        this.win.style.width = width;
-        this.win.style.height = height;
-        this.win.style.top = top;
-        this.win.style.left = left;
+        this.#win.style.width = width;
+        this.#win.style.height = height;
+        this.#win.style.top = top;
+        this.#win.style.left = left;
     }
 
     #getBaseWindowButtons() {
@@ -201,26 +168,30 @@ class Window {
             new WindowButton(
                 'fullscreen-btn',
                 '[ ]',
-                () => this.toggleFullscreen(this.win)
+                () => this.toggleFullscreen(this.#win)
             ).button,
             new WindowButton(
                 'minimize-btn',
                 '-',
                 () => {
-                    this.minimizeWindow(this.win.id)
-                    saveWindowState(this.win.id)
+                    this.minimizeWindow(this.#win.id)
+                    saveWindowState(this.#win.id)
                 }
             ).button,
             new WindowButton(
                 'close-btn',
                 'X',
                 () => {
-                    let winId = this.win.id;
-                    this.closeWindow(this.win.id)
+                    let winId = this.#win.id;
+                    this.closeWindow(this.#win.id)
                     saveWindowState(winId);
                 }
             ).button
         ];
+    }
+
+    #extractNumFromWinId(winId) {
+        return Number(winId.match(/\d+(\.\d+)?/)[0]);
     }
 }
 

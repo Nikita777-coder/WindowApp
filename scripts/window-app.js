@@ -1,4 +1,4 @@
-import { Window } from "./window.js";
+import { Window } from "./window/window.js";
 import * as commons from "./common.js";
 import { simulateFileUpload } from "./loadprocesses.js";
 import * as storage from "./storage.js"
@@ -38,7 +38,7 @@ function reboot() {
         });
         
         savedClosedWindows.forEach(window => commons.classWindows.get(window.id).minimizeWindow());
-        setTimeout(() => commons.classWindows.get(savedFullscreenWindow?.id)?.toggleFullscreen(), 0);
+        commons.classWindows.get(savedFullscreenWindow?.id)?.toggleFullscreen();
     } else {
         commons.setValue("windowcounter", 0);
     }
